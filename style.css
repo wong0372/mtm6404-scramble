@@ -1,0 +1,98 @@
+:root {
+    --cream: #F5F0E1;
+    --pink: #FFB6C1;
+    --brown: #8B4513;
+    --mintgreen: #98FB98;
+    --beige: #D2B48C;
+}
+
+
+body {
+    font-family: "Poppins", serif;
+    background: linear-gradient(var(--cream), var(--pink));
+    color: var(--brown);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    min-height: 100vh;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; 
+}
+
+.game-title {
+    font-size: 20px;
+    color: var(--brown);
+    text-align: center;
+    margin-bottom: 20px;
+}
+  
+
+.game-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 10px rgba(0,0,0,0.1);
+    padding:40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+  
+.scrambled-word {
+    font-size: 36px;
+    font-weight: 600;;
+    letter-spacing: 8px;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+    color: var(--brown);
+    margin-bottom: 20px;
+}
+  
+.input-container {
+    display: flex;
+    margin-bottom: 20px;
+}
+  
+input {
+    font-size: 16px;
+    border-radius: 10px;
+    border: 2px solid var(--mintgreen);
+    padding: 10px;
+    flex-grow: 1;
+}
+  
+button {
+    font-family: "Poppins", serif;
+    font-weight: 500;
+    background-color: var(--beige);
+    border: none;
+    padding: 10px 15px;
+    margin-left: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+  
+button:hover {
+    transform: scale(1.1);
+}
+  
+.message {
+    margin: 10px 0;
+    font-weight: 600;
+}
+  
+.game-stats {
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
