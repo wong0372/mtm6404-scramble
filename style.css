@@ -19,18 +19,18 @@ body {
     min-height: 100vh;
 }
 
-.main-container {
+#root {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center; 
+    align-items: center;
 }
+
 
 .game-title {
     font-size: 20px;
     color: var(--brown);
     text-align: center;
-    margin-bottom: 20px;
 }
   
 
