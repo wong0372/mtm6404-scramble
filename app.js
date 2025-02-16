@@ -47,18 +47,22 @@ const dessertWords = [
   "gelato",
 ];
 
+// use useState to manage state
+// load words from localStorage if available, otherwise, we start with an empty array
 function App() {
-  // State management with localStorage integration
   const [words, setWords] = React.useState(() => {
     const savedWords = localStorage.getItem("gameWords");
     return savedWords ? JSON.parse(savedWords) : [];
   });
 
+  // stores the current word that the player needs to guess
+  // stores the scrambled version of the current word and hold the player's input or guess
   const [currentWord, setCurrentWord] = React.useState("");
   const [scrambledWord, setScrambledWord] = React.useState("");
   const [guess, setGuess] = React.useState("");
 
-  // Use Number() instead of parseInt()
+  // for game stats, points = correct guesses, strikes = wrong guesses, passes = skip guesses
+  // use useState with function to initialize from localStorage if data exists, else set default values
   const [points, setPoints] = React.useState(() => {
     const savedGameData = localStorage.getItem("gameData");
     const gameData = savedGameData ? JSON.parse(savedGameData) : { points: 0 };
