@@ -48,16 +48,45 @@ const dessertWords = [
 ];
 
 function App() {
-  // State management for our game
-  const [words, setWords] = React.useState([]);
+  // State management with localStorage integration
+  const [words, setWords] = React.useState(() => {
+    const savedWords = localStorage.getItem("gameWords");
+    return savedWords ? JSON.parse(savedWords) : [];
+  });
+
   const [currentWord, setCurrentWord] = React.useState("");
   const [scrambledWord, setScrambledWord] = React.useState("");
   const [guess, setGuess] = React.useState("");
-  const [points, setPoints] = React.useState(0);
-  const [strikes, setStrikes] = React.useState(0);
-  const [passes, setPasses] = React.useState(3);
+
+  // Use Number() instead of parseInt()
+  const [points, setPoints] = React.useState(() => {
+    const savedGameData = localStorage.getItem("gameData");
+    const gameData = savedGameData ? JSON.parse(savedGameData) : { points: 0 };
+    return gameData.points;
+  });
+
+  const [strikes, setStrikes] = React.useState(() => {
+    const savedGameData = localStorage.getItem("gameData");
+    const gameData = savedGameData ? JSON.parse(savedGameData) : { strikes: 0 };
+    return gameData.strikes;
+  });
+
+  const [passes, setPasses] = React.useState(() => {
+    const savedGameData = localStorage.getItem("gameData");
+    const gameData = savedGameData ? JSON.parse(savedGameData) : { passes: 3 };
+    return gameData.passes;
+  });
+
   const [message, setMessage] = React.useState("");
   const [gameOver, setGameOver] = React.useState(false);
+
+  // Update localStorage when states change
+  React.useEffect(() => {
+    localStorage.setItem("points", points);
+    localStorage.setItem("strikes", strikes);
+    localStorage.setItem("passes", passes);
+    localStorage.setItem("gameWords", JSON.stringify(words));
+  }, [points, strikes, passes, words]);
 
   // Initialize game when component mounts
   React.useEffect(() => {
@@ -70,6 +99,13 @@ function App() {
     setWords(shuffledWords);
     setCurrentWord(shuffledWords[0]);
     setScrambledWord(shuffle(shuffledWords[0]));
+
+    // Clear localStorage for a fresh start
+    localStorage.removeItem("points");
+    localStorage.removeItem("strikes");
+    localStorage.removeItem("passes");
+    localStorage.removeItem("gameWords");
+
     setPoints(0);
     setStrikes(0);
     setPasses(3);
@@ -79,12 +115,16 @@ function App() {
 
   // Handle player's guess
   const handleGuess = (e) => {
+    console.log(
+      `Current Points: ${points}, Current Strikes: ${strikes}, Current Passes: ${passes}`
+    );
+
     e.preventDefault();
 
     if (guess.toLowerCase() === currentWord) {
       // Correct guess
       setPoints((prev) => prev + 1);
-      setMessage(" ✅ Correct! Let’s move on to next one! 🥳");
+      setMessage(" ✅ Correct! Let's move on to next one! 🥳");
       moveToNextWord();
     } else {
       // Incorrect guess
@@ -120,6 +160,9 @@ function App() {
       setPasses((prev) => prev - 1);
       moveToNextWord();
       setMessage("👀 Word passed 👀");
+    } else {
+      // Add a message when pass limit is reached
+      setMessage("🚨 You've already used all your passes❗❗❗");
     }
   };
 
@@ -155,7 +198,7 @@ function App() {
       ) : (
         <div>
           <h2>
-            {points === dessertWords.length ? "🏆 You Won!" : "🤪 Game Over"}
+            {points === dessertWords.length ? "🌟 You Won! 🌟" : "🤪 Game Over"}
           </h2>
           <p>Your Score: {points}</p>
           <button onClick={startNewGame}>Play Again</button>
@@ -166,4 +209,5 @@ function App() {
 }
 
 // Render the app
-ReactDOM.render(<App />, document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
