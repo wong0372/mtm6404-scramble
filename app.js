@@ -63,6 +63,7 @@ function App() {
 
   // for game stats, points = correct guesses, strikes = wrong guesses, passes = skip guesses
   // use useState with function to initialize from localStorage if data exists, else set default values
+  // started with 0 points, 0 strikes, and 3 passes
   const [points, setPoints] = React.useState(() => {
     const savedGameData = localStorage.getItem("gameData");
     const gameData = savedGameData ? JSON.parse(savedGameData) : { points: 0 };
@@ -81,10 +82,11 @@ function App() {
     return gameData.passes;
   });
 
+  // message to display to the player and check if the game is over
   const [message, setMessage] = React.useState("");
   const [gameOver, setGameOver] = React.useState(false);
 
-  // Update localStorage when states change
+  // use useEffect to save game progress in localStorage
   React.useEffect(() => {
     localStorage.setItem("points", points);
     localStorage.setItem("strikes", strikes);
@@ -92,24 +94,24 @@ function App() {
     localStorage.setItem("gameWords", JSON.stringify(words));
   }, [points, strikes, passes, words]);
 
-  // Initialize game when component mounts
+  // use useEffect to start a new game when the component first loads
   React.useEffect(() => {
     startNewGame();
   }, []);
 
-  // Game initialization logic
+  // function to start or reset the game
+  // shuffle the words first, set the current word, scrambled word, and reset the game stats
   const startNewGame = () => {
     const shuffledWords = shuffle(dessertWords);
     setWords(shuffledWords);
     setCurrentWord(shuffledWords[0]);
     setScrambledWord(shuffle(shuffledWords[0]));
 
-    // Clear localStorage for a fresh start
+    // reset all game stats in both state and localStorage
     localStorage.removeItem("points");
     localStorage.removeItem("strikes");
     localStorage.removeItem("passes");
     localStorage.removeItem("gameWords");
-
     setPoints(0);
     setStrikes(0);
     setPasses(3);
@@ -117,33 +119,32 @@ function App() {
     setMessage("");
   };
 
-  // Handle player's guess
-  const handleGuess = (e) => {
+  // when the player submits a guess
+  // first, prevent page refresh with e.preventDefault()
+  const forGuess = (e) => {
     console.log(
       `Current Points: ${points}, Current Strikes: ${strikes}, Current Passes: ${passes}`
     );
 
     e.preventDefault();
 
+    // check if the guess is correct or not, if correct, increase points and move to the next word
+    // if not, increase strikes and check if the game is over
     if (guess.toLowerCase() === currentWord) {
-      // Correct guess
       setPoints((prev) => prev + 1);
       setMessage(" ✅ Correct! Let's move on to next one! 🥳");
       moveToNextWord();
     } else {
-      // Incorrect guess
       setStrikes((prev) => prev + 1);
       setMessage("❌ Wrong! Try again.");
-
       if (strikes + 1 >= 3) {
         setGameOver(true);
       }
     }
-
     setGuess("");
   };
 
-  // Move to next word
+  // move to next word and end game if no words are left
   const moveToNextWord = () => {
     const remainingWords = words.filter((word) => word !== currentWord);
 
@@ -158,14 +159,14 @@ function App() {
     setScrambledWord(shuffle(nextWord));
   };
 
-  // Pass current word
-  const handlePass = () => {
+  // pass part - allows player to skip a word clicking the pass button
+  const forPass = () => {
     if (passes > 0) {
       setPasses((prev) => prev - 1);
       moveToNextWord();
       setMessage("👀 Word passed 👀");
     } else {
-      // Add a message when pass limit is reached
+      // a message when pass limit is reached
       setMessage("🚨 You've already used all your passes❗❗❗");
     }
   };
@@ -182,7 +183,7 @@ function App() {
 
           <div className="scrambled-word">{scrambledWord}</div>
 
-          <form onSubmit={handleGuess}>
+          <form onSubmit={forGuess}>
             <div className="input-container">
               <input
                 type="text"
@@ -191,7 +192,7 @@ function App() {
                 placeholder="Unscramble the dessert"
               />
               <button type="submit">Guess</button>
-              <button type="button" onClick={handlePass}>
+              <button type="button" onClick={forPass}>
                 Pass
               </button>
             </div>
@@ -212,6 +213,6 @@ function App() {
   );
 }
 
-// Render the app
+// render the app
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App />);
