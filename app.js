@@ -47,7 +47,8 @@ const dessertWords = [
   "gelato",
 ];
 
-// use useState to manage state
+// *** main game component *** //
+// use useState helps manage the state of words in the game
 // load words from localStorage if available, otherwise, we start with an empty array
 function App() {
   const [words, setWords] = React.useState(() => {
@@ -62,7 +63,7 @@ function App() {
   const [guess, setGuess] = React.useState("");
 
   // for game stats, points = correct guesses, strikes = wrong guesses, passes = skip guesses
-  // use useState with function to initialize from localStorage if data exists, else set default values
+  // use useState with function to set the stage from localStorage if data exists, else set default values
   // started with 0 points, 0 strikes, and 3 passes
   const [points, setPoints] = React.useState(() => {
     const savedGameData = localStorage.getItem("gameData");
@@ -121,7 +122,7 @@ function App() {
 
   // when the player submits a guess
   // first, prevent page refresh with e.preventDefault()
-  const forGuess = (e) => {
+  const proceedGuess = (e) => {
     console.log(
       `Current Points: ${points}, Current Strikes: ${strikes}, Current Passes: ${passes}`
     );
@@ -160,7 +161,7 @@ function App() {
   };
 
   // pass part - allows player to skip a word clicking the pass button
-  const forPass = () => {
+  const proceedPass = () => {
     if (passes > 0) {
       setPasses((prev) => prev - 1);
       moveToNextWord();
@@ -183,7 +184,7 @@ function App() {
 
           <div className="scrambled-word">{scrambledWord}</div>
 
-          <form onSubmit={forGuess}>
+          <form onSubmit={proceedGuess}>
             <div className="input-container">
               <input
                 type="text"
@@ -192,7 +193,7 @@ function App() {
                 placeholder="Unscramble the dessert"
               />
               <button type="submit">Guess</button>
-              <button type="button" onClick={forPass}>
+              <button type="button" onClick={proceedPass}>
                 Pass
               </button>
             </div>
