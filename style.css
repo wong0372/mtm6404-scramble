@@ -125,7 +125,7 @@ button:hover {
     }
 }
   
-  /* add multiple emoji positions */
+/* add multiple emoji positions */
 .emoji-background span:nth-child(1)  { left: 5%;  top: 10%; animation-delay: -1s; }
 .emoji-background span:nth-child(2)  { left: 85%; top: 15%; animation-delay: -2s; }
 .emoji-background span:nth-child(3)  { left: 10%; top: 80%; animation-delay: -3s; }
