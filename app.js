@@ -33,7 +33,7 @@ function shuffle(src) {
 /**********************************************
  * YOUR CODE BELOW
  **********************************************/
-// my dessert list
+// create an array for my dessert list
 const desserts = [
   "mochi",
   "macaron",
@@ -47,18 +47,18 @@ const desserts = [
   "gelato",
 ];
 
-// the game app
+// the main game component
 function App() {
-  // Load any saved words or start empty
+  // load the word list from localStorage if its there, otherwise start with an empty array
   let saved = localStorage.getItem("words") || "[]";
   const [words, setWords] = React.useState(JSON.parse(saved));
 
-  // word stuff
+  // word stuff - current one, mixed up version, and the guess
   const [current, setCurrent] = React.useState("");
   const [jumbled, setJumbled] = React.useState("");
   const [guess, setGuess] = React.useState("");
 
-  // game stats from localStorage or defaults
+  // game stats from localStorage or set defaults
   let stats = JSON.parse(
     localStorage.getItem("stats") || '{"points":0,"wrong":0,"skips":3}'
   );
@@ -66,11 +66,11 @@ function App() {
   const [wrong, setWrong] = React.useState(stats.wrong);
   const [skips, setSkips] = React.useState(stats.skips);
 
-  // messages and game state
+  // hold messages for the player and flag if the game is over
   const [msg, setMsg] = React.useState("");
   const [over, setOver] = React.useState(false);
 
-  // save stuff when it changes
+  // save progress to localStorage when it changes
   React.useEffect(() => {
     localStorage.setItem("stats", JSON.stringify({ points, wrong, skips }));
     localStorage.setItem("words", JSON.stringify(words));
@@ -81,7 +81,7 @@ function App() {
     newGame();
   }, []);
 
-  // reset everything for a new game
+  // reset everything for a new game (full shuffled list, current word, mixed up word, points, wrong guesses, skips, and game over flag)
   function newGame() {
     let mixedDesserts = shuffle(desserts);
     setWords(mixedDesserts);
@@ -95,8 +95,9 @@ function App() {
     localStorage.clear();
   }
 
-  // check my guess
+  // handle player’s guess, check if it is right and update accordingly
   function handleGuess(e) {
+    // stop the page from submitting
     e.preventDefault();
     if (guess.toLowerCase() == current) {
       setPoints(points + 1);
@@ -110,7 +111,7 @@ function App() {
     setGuess("");
   }
 
-  // go to the next word
+  // go to the next word, end if game over
   function nextWord() {
     let left = words.filter((w) => w != current);
     if (!left.length) {
@@ -122,7 +123,7 @@ function App() {
     setJumbled(shuffle(left[0]));
   }
 
-  // skip this one
+  // skip the current word if player has passes left
   function skipWord() {
     if (skips > 0) {
       setSkips(skips - 1);
