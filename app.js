@@ -49,7 +49,7 @@ const dessertWords = [
 
 // *** main game component *** //
 // use useState helps manage the state of words in the game
-// load words from localStorage if available, otherwise, we start with an empty array
+// load words from localStorage if available, otherwise, start with an empty array
 function App() {
   const [words, setWords] = React.useState(() => {
     const savedWords = localStorage.getItem("gameWords");
