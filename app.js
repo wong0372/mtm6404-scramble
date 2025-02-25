@@ -33,8 +33,8 @@ function shuffle(src) {
 /**********************************************
  * YOUR CODE BELOW
  **********************************************/
-// create an array for dessert word list
-const dessertWords = [
+// my dessert list
+const desserts = [
   "mochi",
   "macaron",
   "tiramisu",
@@ -47,144 +47,109 @@ const dessertWords = [
   "gelato",
 ];
 
-// *** main game component *** //
-// use useState helps manage the state of words in the game
-// load words from localStorage if available, otherwise, start with an empty array
+// the game app
 function App() {
-  const [words, setWords] = React.useState(() => {
-    const savedWords = localStorage.getItem("gameWords");
-    return savedWords ? JSON.parse(savedWords) : [];
-  });
+  // Load any saved words or start empty
+  let saved = localStorage.getItem("words") || "[]";
+  const [words, setWords] = React.useState(JSON.parse(saved));
 
-  // stores the current word that the player needs to guess
-  // stores the scrambled version of the current word and hold the player's input or guess
-  const [currentWord, setCurrentWord] = React.useState("");
-  const [scrambledWord, setScrambledWord] = React.useState("");
+  // word stuff
+  const [current, setCurrent] = React.useState("");
+  const [jumbled, setJumbled] = React.useState("");
   const [guess, setGuess] = React.useState("");
 
-  // for game stats, points = correct guesses, strikes = wrong guesses, passes = skip guesses
-  // use useState with function to set the stage from localStorage if data exists, else set default values
-  // started with 0 points, 0 strikes, and 3 passes
-  const [points, setPoints] = React.useState(() => {
-    const savedGameData = localStorage.getItem("gameData");
-    const gameData = savedGameData ? JSON.parse(savedGameData) : { points: 0 };
-    return gameData.points;
-  });
+  // game stats from localStorage or defaults
+  let stats = JSON.parse(
+    localStorage.getItem("stats") || '{"points":0,"wrong":0,"skips":3}'
+  );
+  const [points, setPoints] = React.useState(stats.points);
+  const [wrong, setWrong] = React.useState(stats.wrong);
+  const [skips, setSkips] = React.useState(stats.skips);
 
-  const [strikes, setStrikes] = React.useState(() => {
-    const savedGameData = localStorage.getItem("gameData");
-    const gameData = savedGameData ? JSON.parse(savedGameData) : { strikes: 0 };
-    return gameData.strikes;
-  });
+  // messages and game state
+  const [msg, setMsg] = React.useState("");
+  const [over, setOver] = React.useState(false);
 
-  const [passes, setPasses] = React.useState(() => {
-    const savedGameData = localStorage.getItem("gameData");
-    const gameData = savedGameData ? JSON.parse(savedGameData) : { passes: 3 };
-    return gameData.passes;
-  });
-
-  // message to display to the player and check if the game is over
-  const [message, setMessage] = React.useState("");
-  const [gameOver, setGameOver] = React.useState(false);
-
-  // use useEffect to save game progress in localStorage
+  // save stuff when it changes
   React.useEffect(() => {
-    localStorage.setItem("points", points);
-    localStorage.setItem("strikes", strikes);
-    localStorage.setItem("passes", passes);
-    localStorage.setItem("gameWords", JSON.stringify(words));
-  }, [points, strikes, passes, words]);
+    localStorage.setItem("stats", JSON.stringify({ points, wrong, skips }));
+    localStorage.setItem("words", JSON.stringify(words));
+  }, [points, wrong, skips, words]);
 
-  // use useEffect to start a new game when the component first loads
+  // start the game on load
   React.useEffect(() => {
-    startNewGame();
+    newGame();
   }, []);
 
-  // function to start or reset the game
-  // shuffle the words first, set the current word, scrambled word, and reset the game stats
-  const startNewGame = () => {
-    const shuffledWords = shuffle(dessertWords);
-    setWords(shuffledWords);
-    setCurrentWord(shuffledWords[0]);
-    setScrambledWord(shuffle(shuffledWords[0]));
-
-    // reset all game stats in both state and localStorage
-    localStorage.removeItem("points");
-    localStorage.removeItem("strikes");
-    localStorage.removeItem("passes");
-    localStorage.removeItem("gameWords");
+  // reset everything for a new game
+  function newGame() {
+    let mixedDesserts = shuffle(desserts);
+    setWords(mixedDesserts);
+    setCurrent(mixedDesserts[0]);
+    setJumbled(shuffle(mixedDesserts[0]));
     setPoints(0);
-    setStrikes(0);
-    setPasses(3);
-    setGameOver(false);
-    setMessage("");
-  };
+    setWrong(0);
+    setSkips(3);
+    setOver(false);
+    setMsg("Guess the dessert word!");
+    localStorage.clear();
+  }
 
-  // when the player submits a guess
-  // first, prevent page refresh with e.preventDefault()
-  const proceedGuess = (e) => {
-    console.log(
-      `Current Points: ${points}, Current Strikes: ${strikes}, Current Passes: ${passes}`
-    );
-
+  // check my guess
+  function handleGuess(e) {
     e.preventDefault();
-
-    // check if the guess is correct or not, if correct, increase points and move to the next word
-    // if not, increase strikes and check if the game is over
-    if (guess.toLowerCase() === currentWord) {
-      setPoints((prev) => prev + 1);
-      setMessage(" ✅ Correct! Let's move on to next one! 🥳");
-      moveToNextWord();
+    if (guess.toLowerCase() == current) {
+      setPoints(points + 1);
+      setMsg("Got it! Next one...");
+      nextWord();
     } else {
-      setStrikes((prev) => prev + 1);
-      setMessage("❌ Wrong! Try again.");
-      if (strikes + 1 >= 3) {
-        setGameOver(true);
-      }
+      setWrong(wrong + 1);
+      setMsg("Nah, try again.");
+      if (wrong + 1 >= 3) setOver(true);
     }
     setGuess("");
-  };
+  }
 
-  // move to next word and end game if no words are left
-  const moveToNextWord = () => {
-    const remainingWords = words.filter((word) => word !== currentWord);
-
-    if (remainingWords.length === 0) {
-      setGameOver(true);
+  // go to the next word
+  function nextWord() {
+    let left = words.filter((w) => w != current);
+    if (!left.length) {
+      setOver(true);
       return;
     }
+    setWords(left);
+    setCurrent(left[0]);
+    setJumbled(shuffle(left[0]));
+  }
 
-    const nextWord = remainingWords[0];
-    setWords(remainingWords);
-    setCurrentWord(nextWord);
-    setScrambledWord(shuffle(nextWord));
-  };
-
-  // pass part - allows player to skip a word clicking the pass button
-  const proceedPass = () => {
-    if (passes > 0) {
-      setPasses((prev) => prev - 1);
-      moveToNextWord();
-      setMessage("👀 Word passed 👀");
+  // skip this one
+  function skipWord() {
+    if (skips > 0) {
+      setSkips(skips - 1);
+      setMsg("Skipped it.");
+      nextWord();
     } else {
-      // a message when pass limit is reached
-      setMessage("🚨 You've already used all your passes❗❗❗");
+      setMsg("Out of skips!");
     }
-  };
+  }
 
   return (
     <div className="game-container">
-      {!gameOver ? (
-        <>
+      {over ? (
+        <div>
+          <h2>{points == desserts.length ? "You Won !!" : "Game over :("}</h2>
+          <p>Your Score: {points}</p>
+          <button onClick={newGame}>Play Again</button>
+        </div>
+      ) : (
+        <div>
           <div className="game-stats">
             <div>Points: {points}</div>
-            <div>Strikes: {strikes}/3</div>
-            <div>Passes: {passes}</div>
+            <div>Strikes: {wrong}/3</div>
+            <div>Passes: {skips}</div>
           </div>
-
-          <div className="scrambled-word">{scrambledWord}</div>
-
-          <form onSubmit={proceedGuess}>
+          <div className="scrambled-word">{jumbled}</div>
+          <form onSubmit={handleGuess}>
             <div className="input-container">
               <input
                 type="text"
@@ -193,21 +158,12 @@ function App() {
                 placeholder="Unscramble the dessert"
               />
               <button type="submit">Guess</button>
-              <button type="button" onClick={proceedPass}>
+              <button type="button" onClick={skipWord} disabled={skips === 0}>
                 Pass
               </button>
             </div>
           </form>
-
-          {message && <div className="message">{message}</div>}
-        </>
-      ) : (
-        <div>
-          <h2>
-            {points === dessertWords.length ? "🌟 You Won! 🌟" : "🤪 Game Over"}
-          </h2>
-          <p>Your Score: {points}</p>
-          <button onClick={startNewGame}>Play Again</button>
+          {msg && <div className="message">{msg}</div>}
         </div>
       )}
     </div>
